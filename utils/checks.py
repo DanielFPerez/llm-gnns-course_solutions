@@ -30,21 +30,7 @@ def check_dataframe(
     required_cols: list[str] | None = None,
     null_free_cols: list[str] | None = None,
 ):
-    """Validate basic DataFrame properties.
-
-    Parameters
-    ----------
-    tag:
-        Exercise identifier shown in the output, e.g. ``"1.2"``.
-    df:
-        The student's DataFrame.
-    min_rows:
-        If given, check that the DataFrame has at least this many rows.
-    required_cols:
-        Column names that must be present.
-    null_free_cols:
-        Column names that must contain no null values.
-    """
+    """Validate basic DataFrame properties."""
     if not isinstance(df, pd.DataFrame):
         _fail(tag, f"Expected a DataFrame, got {type(df).__name__}.")
         return
@@ -95,7 +81,7 @@ def check_split(
     _ok(tag, sizes)
 
 
-# ── Model checks ─────────────────────────────────────────────────────────────
+# ── Classic ML model checks ───────────────────────────────────────────────────
 
 def check_model(
     tag: str,
@@ -121,3 +107,76 @@ def check_model(
         _fail(tag, f"Macro F1 = {score:.3f} < {min_f1}. Check your training setup.")
         return
     _ok(tag, f"macro F1 = {score:.3f}")
+
+
+# ── GNN model checks ─────────────────────────────────────────────────────────
+
+def check_gnn_model(
+    tag: str,
+    model,
+    data,
+    split: str = "val",
+    min_acc: float = 0.70,
+):
+    """Check a trained PyG GNN achieves reasonable accuracy on a given split.
+
+    Parameters
+    ----------
+    tag:
+        Exercise identifier shown in output.
+    model:
+        A fitted PyTorch model with a ``forward(x, edge_index)`` signature.
+    data:
+        A PyG ``Data`` object with ``x``, ``edge_index``, ``y``, and split masks.
+    split:
+        One of ``"train"``, ``"val"``, or ``"test"``.
+    min_acc:
+        Minimum acceptable accuracy.
+    """
+    import torch
+
+    if not hasattr(model, "parameters"):
+        _fail(tag, "Expected a PyTorch nn.Module.")
+        return
+
+    mask = getattr(data, f"{split}_mask", None)
+    if mask is None:
+        _fail(tag, f"data.{split}_mask not found.")
+        return
+
+    model.eval()
+    try:
+        with torch.no_grad():
+            out = model(data.x, data.edge_index)
+    except Exception as exc:
+        _fail(tag, f"model.forward() raised: {exc}")
+        return
+
+    pred = out.argmax(dim=1)
+    acc = (pred[mask] == data.y[mask]).float().mean().item()
+
+    if acc < min_acc:
+        _fail(tag, f"{split} accuracy = {acc:.3f} < {min_acc}. Check model or training.")
+        return
+    _ok(tag, f"{split}_acc = {acc:.3f}")
+
+
+def check_graph(
+    tag: str,
+    G,
+    min_nodes: int | None = None,
+    min_edges: int | None = None,
+):
+    """Validate a NetworkX graph."""
+    import networkx as nx
+
+    if not isinstance(G, (nx.Graph, nx.DiGraph)):
+        _fail(tag, f"Expected a NetworkX Graph, got {type(G).__name__}.")
+        return
+    if min_nodes is not None and G.number_of_nodes() < min_nodes:
+        _fail(tag, f"Expected ≥{min_nodes} nodes, got {G.number_of_nodes()}.")
+        return
+    if min_edges is not None and G.number_of_edges() < min_edges:
+        _fail(tag, f"Expected ≥{min_edges} edges, got {G.number_of_edges()}.")
+        return
+    _ok(tag, f"nodes={G.number_of_nodes()}, edges={G.number_of_edges()}")
