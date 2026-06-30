@@ -16,7 +16,7 @@ def plot_class_distribution(
 ):
     """Bar chart of value counts for a binary (or multi-class) target Series."""
     if ax is None:
-        _, ax = plt.subplots(figsize=(4, 3))
+        _, ax = plt.subplots(figsize=(6, 5))
 
     counts = series.value_counts().sort_index()
     if labels is None:
@@ -27,8 +27,8 @@ def plot_class_distribution(
     for bar, count in zip(bars, counts.values):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
-            bar.get_height() + counts.max() * 0.01,
-            f"{count:,}\n({count / counts.sum():.1%})",
+            bar.get_height() + counts.max() * 0.005,
+            f"{count:,}  ({count / counts.sum():.1%})",
             ha="center", va="bottom", fontsize=9,
         )
     ax.set_title(title)
