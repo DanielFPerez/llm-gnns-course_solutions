@@ -1,5 +1,5 @@
 # ── Module I — core data & ML stack ──────────────────────────────────────────
-numpy>=1.26,<2.0
+numpy>=1.26
 pandas>=2.1,<3.0
 matplotlib>=3.8,<4.0
 seaborn>=0.13,<1.0
