@@ -27,6 +27,7 @@ The course builds from classic ML fundamentals all the way to hybrid systems tha
 ### Module 2 — LLMs and RAG
 | Lab | Title | Topics |
 |---|---|---|
+| `lab2_0` | Python Basics: A Quick Primer | variables, strings, control flow, lists, dictionaries, loops, functions (optional, for those new to Python) |
 | `lab2_1` | Open-Source LLMs: First Contact | `SimpleLLM`, system prompts, temperature, hallucination, context windows |
 | `lab2_2` | Local Chatbot | conversation history, multi-turn chat, `Chatbot` class |
 | `lab2_3` | Basic RAG | document chunking, FAISS index, semantic retrieval, answer generation |
@@ -121,6 +122,7 @@ llm-gnns-course_solutions/
 │   ├── lab1_1_data_exploration.ipynb
 │   └── lab1_2_first_ml_model.ipynb
 ├── module-2-llm/
+│   ├── lab2_0_python_basics.ipynb
 │   ├── lab2_1_open_source_llms.ipynb
 │   ├── lab2_2_local_chatbot.ipynb
 │   ├── lab2_3_basic_rag.ipynb
