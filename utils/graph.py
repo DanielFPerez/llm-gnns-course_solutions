@@ -19,7 +19,9 @@ def plot_graph(
     labels: dict | None = None,
     label_names: list[str] | None = None,
     title: str = "",
-    node_size: int = 400,
+    node_size: int | float | dict | list | np.ndarray = 400,
+    node_color: str | dict | list | np.ndarray | None = None,
+    pos: dict | None = None,
     seed: int = 42,
     ax=None,
 ):
@@ -30,20 +32,44 @@ def plot_graph(
     G:
         A ``networkx.Graph`` or ``DiGraph``.
     labels:
-        Dict mapping node id → integer class index.
+        Dict mapping node id → integer class index. Used to colour nodes
+        (and draw a legend) when ``node_color`` is not given explicitly.
     label_names:
         Human-readable class names indexed by class integer.
+    node_size:
+        Either a single size applied to every node, or a dict mapping
+        node id → size (e.g. scaled by degree).
+    node_color:
+        Explicit colour override: a single colour for every node, or a
+        dict mapping node id → colour. Takes precedence over ``labels``.
+    pos:
+        Precomputed node positions (as returned by any ``networkx`` layout
+        function, e.g. ``nx.spring_layout``). If omitted, a spring layout
+        is computed using ``seed``.
     """
     import networkx as nx
 
     if ax is None:
         _, ax = plt.subplots(figsize=(7, 5))
 
-    pos = nx.spring_layout(G, seed=seed)
+    if pos is None:
+        pos = nx.spring_layout(G, seed=seed)
 
-    if labels is not None:
+    if isinstance(node_size, dict):
+        node_size = [node_size.get(n, 400) for n in G.nodes()]
+
+    cmap, unique = None, None
+    if node_color is not None:
+        node_colors = (
+            [node_color.get(n, "#4C72B0") for n in G.nodes()]
+            if isinstance(node_color, dict) else node_color
+        )
+    elif labels is not None:
         unique = sorted(set(labels.values()))
-        cmap = plt.cm.tab10(np.linspace(0, 1, max(len(unique), 2)))
+        n_colors = max(unique) + 1 if unique else 1
+        if label_names:
+            n_colors = max(n_colors, len(label_names))
+        cmap = plt.cm.tab10(np.linspace(0, 1, max(n_colors, 2)))
         node_colors = [cmap[labels.get(n, 0)] for n in G.nodes()]
     else:
         node_colors = "#4C72B0"
@@ -54,9 +80,7 @@ def plot_graph(
         edge_color="#cccccc", with_labels=True, font_size=8,
     )
 
-    if labels is not None and label_names:
-        unique = sorted(set(labels.values()))
-        cmap = plt.cm.tab10(np.linspace(0, 1, max(len(unique), 2)))
+    if cmap is not None and label_names:
         handles = [
             plt.scatter([], [], c=[cmap[i]], label=label_names[i], s=60)
             for i in unique if i < len(label_names)
@@ -68,13 +92,13 @@ def plot_graph(
     return ax
 
 
-def plot_degree_distribution(degrees: list[int], title: str = "Degree distribution", ax=None):
+def plot_degree_distribution(degrees: list[int], title: str = "Degree distribution", ax=None, width=1.0):
     """Bar chart of degree counts."""
     if ax is None:
         _, ax = plt.subplots(figsize=(6, 3))
 
     unique, counts = np.unique(degrees, return_counts=True)
-    ax.bar(unique, counts, color="#4C72B0", edgecolor="white", width=0.8)
+    ax.bar(unique, counts, color="#4C72B0", edgecolor="white", width=width)
     ax.set_xlabel("Degree (number of neighbours)")
     ax.set_ylabel("Number of nodes")
     ax.set_title(title)

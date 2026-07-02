@@ -26,6 +26,7 @@ AVAILABLE_HF_MODELS = {
     "SmolLM2 135M Instruct — tiny, weakest quality (~270 MB)": "HuggingFaceTB/SmolLM2-135M-Instruct",
     "Qwen2.5 0.5B Instruct (~1 GB)": "Qwen/Qwen2.5-0.5B-Instruct",
     "Qwen2.5 1.5B Instruct (~3 GB)": "Qwen/Qwen2.5-1.5B-Instruct",
+    "EL-mistral-que-yo-quiero": "mistralai/Mistral-7B-Instruct-v0.3"
 }
 
 
