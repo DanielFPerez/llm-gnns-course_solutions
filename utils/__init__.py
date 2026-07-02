@@ -12,7 +12,7 @@ from .graph import (
     plot_attention_subgraph,
 )
 from .checks import check_dataframe, check_split, check_model, check_gnn_model, check_graph
-from .llm import SimpleLLM
+from .llm import SimpleLLM, AVAILABLE_HF_MODELS, pick_hf_model
 
 __all__ = [
     # data
@@ -36,4 +36,6 @@ __all__ = [
     "check_graph",
     # llm
     "SimpleLLM",
+    "AVAILABLE_HF_MODELS",
+    "pick_hf_model",
 ]

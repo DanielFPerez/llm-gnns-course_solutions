@@ -17,6 +17,39 @@ _OLLAMA_URL = "http://localhost:11434"
 _HF_FALLBACK = "HuggingFaceTB/SmolLM2-1.7B-Instruct"
 _OLLAMA_DEFAULT = "llama3.2:1b"
 
+# Curated, ungated instruct models that work with transformers' text-generation
+# pipeline out of the box (no HuggingFace login required). Sizes are approximate
+# download sizes. Smaller models are faster on CPU; larger ones answer better.
+AVAILABLE_HF_MODELS = {
+    "SmolLM2 1.7B Instruct — default, best quality (~3.4 GB)": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    "SmolLM2 360M Instruct — fast, CPU-friendly (~750 MB)": "HuggingFaceTB/SmolLM2-360M-Instruct",
+    "SmolLM2 135M Instruct — tiny, weakest quality (~270 MB)": "HuggingFaceTB/SmolLM2-135M-Instruct",
+    "Qwen2.5 0.5B Instruct (~1 GB)": "Qwen/Qwen2.5-0.5B-Instruct",
+    "Qwen2.5 1.5B Instruct (~3 GB)": "Qwen/Qwen2.5-1.5B-Instruct",
+}
+
+
+def pick_hf_model(default: str = _HF_FALLBACK):
+    """Display a dropdown to pick a HuggingFace model and return the widget.
+
+    Read the selected model ID from the returned widget's ``.value`` attribute
+    (e.g. ``SimpleLLM(hf_model=picker.value)``). If the notebook is run
+    top-to-bottom without interacting with the dropdown, ``.value`` stays at
+    ``default``, so this is safe to use in "Run All" / Colab execution.
+    """
+    import ipywidgets as widgets
+    from IPython.display import display
+
+    dropdown = widgets.Dropdown(
+        options=AVAILABLE_HF_MODELS,
+        value=default,
+        description="HF model:",
+        style={"description_width": "initial"},
+        layout=widgets.Layout(width="480px"),
+    )
+    display(dropdown)
+    return dropdown
+
 
 def _detect_ollama() -> bool:
     try:
